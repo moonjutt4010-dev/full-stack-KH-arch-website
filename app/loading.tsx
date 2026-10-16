@@ -1,0 +1,1 @@
+export default function Loading(){return <main className="section-wrap" aria-busy="true"><div className="eyebrow">FORMA STUDIO</div><p role="status" className="body-copy mt-6">Preparing your space…</p></main>;}

@@ -1,0 +1,4 @@
+﻿import PublicPage from "@/components/PublicPage";
+import ConsultationForm from "@/components/ConsultationForm";
+export const metadata = {title:"Start a conversation"};
+export default function ContactPage() {return <PublicPage eyebrow="YOUR PROJECT STARTS HERE" title="Let’s find the possibilities." description="An idea, a site, or a fresh start. Tell us what you have in mind."><section className="section-wrap split-page"><div className="body-copy"><h2>First, we listen.</h2><p>A great project begins with understanding your ambitions. Share a few details and we’ll explore how the studio can help.</p><p>We’ll review your brief, discuss your priorities, and work with you to define a thoughtful next step.</p><div className="panel"><div className="eyebrow">A CONSIDERED BEGINNING</div><p className="mt-4">01 &nbsp; Share your vision<br />02 &nbsp; Meet the studio<br />03 &nbsp; Shape the way forward</p></div></div><ConsultationForm /></section></PublicPage>;}

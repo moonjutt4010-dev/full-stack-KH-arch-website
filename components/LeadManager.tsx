@@ -1,0 +1,19 @@
+"use client";
+import { useActionState, useState } from "react";
+import { assignCustomer, updateLeadStatus } from "@/app/admin/actions";
+import { statuses, type Lead } from "@/lib/validation";
+
+function LeadControls({lead}:{lead:Lead}) {
+ const [state,action,pending]=useActionState(updateLeadStatus,{message:"",error:false});
+ const [assignment,assign,isAssigning]=useActionState(assignCustomer,{message:"",error:false});
+ return <details><summary className="cursor-pointer underline">View & manage</summary><div className="min-w-64 py-4"><p className="whitespace-pre-wrap leading-6">{lead.message}</p><p className="mt-3 text-gray-500">Phone: {lead.phone || "Not supplied"}<br />Location: {lead.location}<br />Budget: {lead.budget}</p><form action={action} className="mt-4 grid gap-3"><input type="hidden" name="id" value={lead.id} /><input type="hidden" name="previousStatus" value={lead.status} /><label>Pipeline stage<select name="status" defaultValue={lead.status}>{statuses.map(s=><option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}</select></label><button className="button dark" disabled={pending}>{pending ? "Saving…" : "Save status"}</button><p role="status" className={state.error ? "text-red-800" : ""}>{state.message}</p></form><form action={assign} className="mt-5 grid gap-3"><input type="hidden" name="id" value={lead.id} /><label>Link verified customer account<input name="customerId" required placeholder="Customer account UUID" defaultValue={lead.customer_id || ""} /></label><p className="text-xs text-gray-500">Verify the customer’s identity before granting access.</p><button className="button dark" disabled={isAssigning}>{isAssigning ? "Linking…" : "Link customer"}</button><p role="status">{assignment.message}</p></form></div></details>;
+}
+export default function LeadManager({leads}:{leads:Lead[]}) {
+ const [search,setSearch]=useState("");
+ const [stage,setStage]=useState("all");
+ const [view,setView]=useState<"list"|"pipeline">("list");
+ const filtered=leads.filter(l=>(stage==="all" || l.status===stage) && `${l.name} ${l.email} ${l.service} ${l.location}`.toLowerCase().includes(search.toLowerCase()));
+ return <section className="panel"><h2>Lead workspace</h2><div className="toolbar"><input aria-label="Search leads" placeholder="Search name, email, or location…" value={search} onChange={e=>setSearch(e.target.value)} /><select aria-label="Filter by status" className="w-auto" value={stage} onChange={e=>setStage(e.target.value)}><option value="all">All stages</option>{statuses.map(s=><option key={s}>{s}</option>)}</select><button aria-pressed={view==="list"} onClick={()=>setView("list")}>List view</button><button aria-pressed={view==="pipeline"} onClick={()=>setView("pipeline")}>Pipeline view</button><span className="quiet-label">{filtered.length} REQUESTS</span></div>
+ {!filtered.length ? <p className="empty">{leads.length ? "No leads match your filters." : "No consultation requests yet. New inquiries will appear here."}</p> : view==="list" ? <div className="table-scroll"><table><thead><tr><th>CLIENT</th><th>PROJECT</th><th>RECEIVED</th><th>STATUS</th><th>ACTIONS</th></tr></thead><tbody>{filtered.map(l=><tr key={l.id}><td>{l.name}<small>{l.email}</small></td><td>{l.service}<small>{l.location}</small></td><td>{new Date(l.created_at).toLocaleDateString("en-GB",{timeZone:"UTC"})}</td><td><span className="badge">{l.status}</span></td><td><LeadControls lead={l}/></td></tr>)}</tbody></table></div> : <div className="pipeline">{statuses.map(status=><div className="pipeline-column" key={status}><h3>{status} · {filtered.filter(l=>l.status===status).length}</h3>{filtered.filter(l=>l.status===status).map(l=><div className="lead-card" key={l.id}>{l.name}<p>{l.service}</p><div className="mt-4"><LeadControls lead={l}/></div></div>)}</div>)}</div>}
+ </section>;
+}
